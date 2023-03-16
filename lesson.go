@@ -31,12 +31,15 @@ func (lr *LessonRequest) CreateGPTMessage() []openai.ChatCompletionMessage {
 	return m
 }
 
+//define a lesson response type
 type LessonResponse struct {
-	Lesson string `json:"lesson"`
+	LessonRequest *LessonRequest
+	Lesson        string `json:"lesson"`
 }
 
-func NewLessonResponse(l string) *LessonResponse {
+func NewLessonResponse(lr *LessonRequest, l string) *LessonResponse {
 	return &LessonResponse{
-		Lesson: l,
+		LessonRequest: lr,
+		Lesson:        l,
 	}
 }

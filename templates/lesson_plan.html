@@ -1,0 +1,13 @@
+{{ template "header.html"}}
+
+<div class="album py-4 bg-light">
+    <div class="container">
+        <h1>Lesson Plan</h1>
+        <h3>Grade: {{.LessonRequest.Grade}}</h3>
+        <h3>Content: {{.LessonRequest.ItemDescriptor}}</h3>
+        <br>
+        <p>{{.Lesson}}</p>
+    </div>
+</div>
+
+{{template "footer.html"}}

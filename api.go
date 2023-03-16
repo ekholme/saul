@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -15,9 +16,10 @@ type Server struct {
 	Router    *mux.Router
 	Srvr      *http.Server
 	GPTClient *openai.Client
+	Templates *template.Template
 }
 
-func NewServer(r *mux.Router, client *openai.Client) *Server {
+func NewServer(r *mux.Router, client *openai.Client, t *template.Template) *Server {
 	listenAddr := ":8080"
 
 	return &Server{
@@ -26,13 +28,14 @@ func NewServer(r *mux.Router, client *openai.Client) *Server {
 			Addr: listenAddr,
 		},
 		GPTClient: client,
+		Templates: t,
 	}
 }
 
 // register routes
 func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/", s.handleIndex).Methods("GET")
-	s.Router.HandleFunc("/lesson", s.handleRequestLesson).Methods("POST")
+	s.Router.HandleFunc("/lesson", s.handleMockLesson).Methods("POST")
 }
 
 // method to run the server
@@ -81,9 +84,29 @@ func (s *Server) handleRequestLesson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l := NewLessonResponse(resp.Choices[0].Message.Content)
+	l := NewLessonResponse(lr, resp.Choices[0].Message.Content)
 
 	WriteJSON(w, http.StatusOK, l)
+}
+
+func (s *Server) handleMockLesson(w http.ResponseWriter, r *http.Request) {
+	var lr *LessonRequest
+
+	err := json.NewDecoder(r.Body).Decode(&lr)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	m := "this is a mock response for " + lr.Grade + " graders and a lesson on " + lr.ItemDescriptor
+
+	l := NewLessonResponse(lr, m)
+
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+
+	s.Templates.ExecuteTemplate(w, "lesson_plan.html", l)
 }
 
 // writeJSON helper
