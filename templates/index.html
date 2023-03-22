@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Saul</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/lux/bootstrap.min.css"
+        integrity="sha384-9+PGKSqjRdkeAU7Eu4nkJU8RFaH8ace8HGXnkiKMP9I9Te0GJ4/km3L1Z8tXigpG" crossorigin="anonymous">
+</head>
+
+<body class="container">
+
+<h1 class="container">Saul</h1>
+
+<p>Saul is a lightweight lesson planning app that allows you to generate a lesson plan for a specific grade given an SOL item descriptor</p>
+
+<h3>Generate a Lesson</h3>
+
+<div class="container">
+    <div class="album py-4 bg-light">
+<form action="/" method="post" name="newlesson">
+        <div>
+            <input type="text" placeholder="Grade Level" name="grade"></input>
+        </div>
+        <br /><br />
+        <div>
+            <textarea name="itemDescriptor" , placeholder="Type your item descriptor here"></textarea>
+        </div>
+        <br /><br />
+        <input type="submit" value="Get a Lesson!"></input>
+        <br /><br />
+</form>
+    </div>
+</div>
+
+</body>
+</html>

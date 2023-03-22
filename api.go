@@ -35,7 +35,8 @@ func NewServer(r *mux.Router, client *openai.Client, t *template.Template) *Serv
 // register routes
 func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/", s.handleIndex).Methods("GET")
-	s.Router.HandleFunc("/lesson", s.handleMockLesson).Methods("POST")
+	// s.Router.HandleFunc("/lesson", s.handleMockLesson).Methods("POST")
+	s.Router.HandleFunc("/", s.handleRequestLesson).Methods("POST")
 }
 
 // method to run the server
@@ -51,21 +52,19 @@ func (s *Server) Run() {
 
 // define some handlers
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
-	msg := make(map[string]string)
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
 
-	msg["welcome"] = "Welcome to Saul"
-
-	WriteJSON(w, 200, msg)
+	s.Templates.ExecuteTemplate(w, "index.html", nil)
 }
 
 func (s *Server) handleRequestLesson(w http.ResponseWriter, r *http.Request) {
-	var lr *LessonRequest
 
-	err := json.NewDecoder(r.Body).Decode(&lr)
+	r.ParseForm()
 
-	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, err)
-		return
+	lr := &LessonRequest{
+		Grade:          r.FormValue("grade"),
+		ItemDescriptor: r.FormValue("itemDescriptor"),
 	}
 
 	m := lr.CreateGPTMessage()
@@ -86,7 +85,12 @@ func (s *Server) handleRequestLesson(w http.ResponseWriter, r *http.Request) {
 
 	l := NewLessonResponse(lr, resp.Choices[0].Message.Content)
 
-	WriteJSON(w, http.StatusOK, l)
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+
+	s.Templates.ExecuteTemplate(w, "lesson_plan.html", l)
+
+	// WriteJSON(w, http.StatusOK, l)
 }
 
 func (s *Server) handleMockLesson(w http.ResponseWriter, r *http.Request) {
