@@ -1,4 +1,4 @@
-package saul
+package main
 
 import "github.com/sashabaranov/go-openai"
 
@@ -31,7 +31,7 @@ func (lr *LessonRequest) CreateGPTMessage() []openai.ChatCompletionMessage {
 	return m
 }
 
-//define a lesson response type
+// define a lesson response type
 type LessonResponse struct {
 	LessonRequest *LessonRequest
 	Lesson        string `json:"lesson"`

@@ -1,4 +1,4 @@
-package saul
+package main
 
 import (
 	"context"
@@ -90,7 +90,6 @@ func (s *Server) handleRequestLesson(w http.ResponseWriter, r *http.Request) {
 
 	s.Templates.ExecuteTemplate(w, "lesson_plan.html", l)
 
-	// WriteJSON(w, http.StatusOK, l)
 }
 
 func (s *Server) handleMockLesson(w http.ResponseWriter, r *http.Request) {
