@@ -16,4 +16,4 @@ RUN go build
 
 EXPOSE $PORT
 
-CMD["./saul"]
+CMD ["./saul"]
