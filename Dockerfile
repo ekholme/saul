@@ -12,7 +12,7 @@ COPY . .
 
 ENV PORT 8080
 
-RUN go build
+RUN go build ./...
 
 EXPOSE $PORT
 

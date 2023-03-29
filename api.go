@@ -1,4 +1,4 @@
-package main
+package saul
 
 import (
 	"context"
@@ -35,8 +35,8 @@ func NewServer(r *mux.Router, client *openai.Client, t *template.Template) *Serv
 // register routes
 func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/", s.handleIndex).Methods("GET")
-	// s.Router.HandleFunc("/lesson", s.handleMockLesson).Methods("POST")
-	s.Router.HandleFunc("/", s.handleRequestLesson).Methods("POST")
+	s.Router.HandleFunc("/", s.handleMockLesson).Methods("POST")
+	// s.Router.HandleFunc("/", s.handleRequestLesson).Methods("POST")
 }
 
 // method to run the server
@@ -93,13 +93,11 @@ func (s *Server) handleRequestLesson(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleMockLesson(w http.ResponseWriter, r *http.Request) {
-	var lr *LessonRequest
+	r.ParseForm()
 
-	err := json.NewDecoder(r.Body).Decode(&lr)
-
-	if err != nil {
-		WriteJSON(w, http.StatusInternalServerError, err)
-		return
+	lr := &LessonRequest{
+		Grade:          r.FormValue("grade"),
+		ItemDescriptor: r.FormValue("itemDescriptor"),
 	}
 
 	m := "this is a mock response for " + lr.Grade + " graders and a lesson on " + lr.ItemDescriptor

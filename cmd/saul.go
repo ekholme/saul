@@ -5,16 +5,16 @@ import (
 	"log"
 	"os"
 
+	"github.com/ekholme/saul"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	openai "github.com/sashabaranov/go-openai"
 )
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("couldn't load .env file")
-	}
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatalf("couldn't load .env file")
+	// }
 
 	tmpl, err := template.ParseGlob("templates/*.html")
 	if err != nil {
@@ -27,7 +27,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	s := NewServer(r, client, tmpl)
+	s := saul.NewServer(r, client, tmpl)
 
 	s.Run()
 }
