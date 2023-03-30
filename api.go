@@ -65,6 +65,7 @@ func (s *Server) handleRequestLesson(w http.ResponseWriter, r *http.Request) {
 	lr := &LessonRequest{
 		Grade:          r.FormValue("grade"),
 		ItemDescriptor: r.FormValue("itemDescriptor"),
+		StudentPop:     r.FormValue("studentPop"),
 	}
 
 	m := lr.CreateGPTMessage()
@@ -98,9 +99,16 @@ func (s *Server) handleMockLesson(w http.ResponseWriter, r *http.Request) {
 	lr := &LessonRequest{
 		Grade:          r.FormValue("grade"),
 		ItemDescriptor: r.FormValue("itemDescriptor"),
+		StudentPop:     r.FormValue("studentPop"),
 	}
 
-	m := "this is a mock response for " + lr.Grade + " graders and a lesson on " + lr.ItemDescriptor
+	var m string
+
+	if lr.StudentPop == "all students" {
+		m = "this is a mock response for " + lr.Grade + " graders and a lesson on " + lr.ItemDescriptor
+	} else {
+		m = "this is a mock response for " + lr.Grade + " grade " + lr.StudentPop + " and a lesson on " + lr.ItemDescriptor
+	}
 
 	l := NewLessonResponse(lr, m)
 
