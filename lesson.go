@@ -16,7 +16,7 @@ func (lr *LessonRequest) CreateGPTMessage() []openai.ChatCompletionMessage {
 	if lr.StudentPop == "all students" {
 		s = "Plan a lesson for " + lr.Grade + " students on " + lr.ItemDescriptor
 	} else {
-		s = "Plan a lesson for " + lr.Grade + " grade" + lr.StudentPop + " on " + lr.ItemDescriptor
+		s = "Plan a lesson for " + lr.Grade + " grade " + lr.StudentPop + " on " + lr.ItemDescriptor
 	}
 
 	m := []openai.ChatCompletionMessage{
