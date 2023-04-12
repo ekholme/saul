@@ -35,8 +35,11 @@ func NewServer(r *mux.Router, client *openai.Client, t *template.Template) *Serv
 // register routes
 func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/", s.handleIndex).Methods("GET")
+	s.Router.HandleFunc("/free", s.handleRequestLesson).Methods("POST")
+	s.Router.HandleFunc("/free", s.handleFree).Methods("GET")
+
 	// s.Router.HandleFunc("/", s.handleMockLesson).Methods("POST")
-	s.Router.HandleFunc("/", s.handleRequestLesson).Methods("POST")
+
 }
 
 // method to run the server
@@ -56,6 +59,14 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	s.Templates.ExecuteTemplate(w, "index.html", nil)
+}
+
+func (s *Server) handleFree(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+
+	s.Templates.ExecuteTemplate(w, "free.html", nil)
+
 }
 
 func (s *Server) handleRequestLesson(w http.ResponseWriter, r *http.Request) {
