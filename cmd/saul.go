@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("couldn't load .env file")
@@ -24,11 +25,19 @@ func main() {
 
 	apiKey := os.Getenv("OPENAI_API_KEY")
 
+	//openai client
 	client := openai.NewClient(apiKey)
 
+	//firestore client & performance service
+	fsClient := saul.NewFirestoreClient()
+
+	ps := saul.NewPerformanceService(fsClient)
+
+	//create router
 	r := mux.NewRouter()
 
-	s := saul.NewServer(r, client, tmpl)
+	//create server
+	s := saul.NewServer(r, client, tmpl, ps)
 
 	s.Run()
 }

@@ -13,13 +13,14 @@ import (
 
 // define a server type
 type Server struct {
-	Router    *mux.Router
-	Srvr      *http.Server
-	GPTClient *openai.Client
-	Templates *template.Template
+	Router             *mux.Router
+	Srvr               *http.Server
+	GPTClient          *openai.Client
+	Templates          *template.Template
+	PerformanceService *PerformanceService
 }
 
-func NewServer(r *mux.Router, client *openai.Client, t *template.Template) *Server {
+func NewServer(r *mux.Router, client *openai.Client, t *template.Template, ps *PerformanceService) *Server {
 	listenAddr := ":8080"
 
 	return &Server{
@@ -27,8 +28,9 @@ func NewServer(r *mux.Router, client *openai.Client, t *template.Template) *Serv
 		Srvr: &http.Server{
 			Addr: listenAddr,
 		},
-		GPTClient: client,
-		Templates: t,
+		GPTClient:          client,
+		Templates:          t,
+		PerformanceService: ps,
 	}
 }
 
