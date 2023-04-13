@@ -31,15 +31,20 @@ func main() {
 	//firestore client & performance service
 	fsClient := saul.NewFirestoreClient()
 
+	//performance service
 	ps := saul.NewPerformanceService(fsClient)
 
+	//test service
 	ts := saul.NewTestService(fsClient)
+
+	//school service
+	ss := saul.NewSchoolService(fsClient)
 
 	//create router
 	r := mux.NewRouter()
 
 	//create server
-	s := saul.NewServer(r, client, tmpl, ps, ts)
+	s := saul.NewServer(r, client, tmpl, ps, ts, ss)
 
 	s.Run()
 }

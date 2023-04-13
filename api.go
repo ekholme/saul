@@ -19,9 +19,10 @@ type Server struct {
 	Templates          *template.Template
 	PerformanceService *PerformanceService
 	TestService        *TestService
+	SchoolService      *SchoolService
 }
 
-func NewServer(r *mux.Router, client *openai.Client, t *template.Template, ps *PerformanceService, ts *TestService) *Server {
+func NewServer(r *mux.Router, client *openai.Client, t *template.Template, ps *PerformanceService, ts *TestService, ss *SchoolService) *Server {
 	listenAddr := ":8080"
 
 	return &Server{
@@ -33,6 +34,7 @@ func NewServer(r *mux.Router, client *openai.Client, t *template.Template, ps *P
 		Templates:          t,
 		PerformanceService: ps,
 		TestService:        ts,
+		SchoolService:      ss,
 	}
 }
 
@@ -41,7 +43,7 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/", s.handleIndex).Methods("GET")
 	s.Router.HandleFunc("/free", s.handleRequestLesson).Methods("POST")
 	s.Router.HandleFunc("/free", s.handleFree).Methods("GET")
-
+	s.Router.HandleFunc("/guided", s.handleSchool).Methods("GET")
 	// s.Router.HandleFunc("/", s.handleMockLesson).Methods("POST")
 
 }
@@ -131,6 +133,23 @@ func (s *Server) handleMockLesson(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	s.Templates.ExecuteTemplate(w, "lesson_plan.html", l)
+}
+
+func (s *Server) handleSchool(w http.ResponseWriter, r *http.Request) {
+
+	ctx := context.Background()
+
+	schs, err := s.SchoolService.GetAllSchools(ctx)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+
+	s.Templates.ExecuteTemplate(w, "schools.html", schs)
 }
 
 // writeJSON helper
