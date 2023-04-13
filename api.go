@@ -18,9 +18,10 @@ type Server struct {
 	GPTClient          *openai.Client
 	Templates          *template.Template
 	PerformanceService *PerformanceService
+	TestService        *TestService
 }
 
-func NewServer(r *mux.Router, client *openai.Client, t *template.Template, ps *PerformanceService) *Server {
+func NewServer(r *mux.Router, client *openai.Client, t *template.Template, ps *PerformanceService, ts *TestService) *Server {
 	listenAddr := ":8080"
 
 	return &Server{
@@ -31,6 +32,7 @@ func NewServer(r *mux.Router, client *openai.Client, t *template.Template, ps *P
 		GPTClient:          client,
 		Templates:          t,
 		PerformanceService: ps,
+		TestService:        ts,
 	}
 }
 

@@ -33,11 +33,13 @@ func main() {
 
 	ps := saul.NewPerformanceService(fsClient)
 
+	ts := saul.NewTestService(fsClient)
+
 	//create router
 	r := mux.NewRouter()
 
 	//create server
-	s := saul.NewServer(r, client, tmpl, ps)
+	s := saul.NewServer(r, client, tmpl, ps, ts)
 
 	s.Run()
 }

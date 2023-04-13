@@ -30,3 +30,9 @@ df_anon <- df_sub |>
 
 #write out 
 write_csv(df_anon, here::here("data/toy_data.csv"), col_names = FALSE)
+
+# write out a df with just the unique tests
+tsts_df <- df_anon |>
+    distinct(sch_name, test)
+
+write_csv(tsts_df, here::here("data/tsts.csv"), col_names = FALSE)
