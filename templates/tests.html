@@ -1,5 +1,19 @@
 {{ template "header.html"}}
 
-<p>Some demo text</p>
+<form action="{{.URL}}" method="post" name="tests">
+    <div class="col-12">
+        <label for="test" class="form-label">Select a Test</label>
+        <select class="form-select" aria-label="test" name="test">
+            {{range .Tests}}
+                <option value="{{.Test}}">{{.Test}}</option>
+            {{end}}
+        </select>
+    </div>
 
-{{template "footer.html"}}
+    <div class="text-center">
+        <button class="w-33 btn btn-primary btn-lg" type="submit">Next</button>
+    </div>
+
+</form>
+
+{{ template "footer.html"}}

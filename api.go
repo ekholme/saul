@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/mux"
 	"github.com/sashabaranov/go-openai"
@@ -44,6 +45,8 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/free", s.handleRequestLesson).Methods("POST")
 	s.Router.HandleFunc("/free", s.handleFree).Methods("GET")
 	s.Router.HandleFunc("/guided", s.handleSchool).Methods("GET")
+	s.Router.HandleFunc("/guided", s.handleTestRedirect).Methods("POST")
+	s.Router.HandleFunc("/guided/{school}", s.handleGetTestsBySchool).Methods("GET")
 	// s.Router.HandleFunc("/", s.handleMockLesson).Methods("POST")
 
 }
@@ -110,6 +113,8 @@ func (s *Server) handleRequestLesson(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// function to mock out creating a lesson
+// useful for testing UI without making requests to OpenAI
 func (s *Server) handleMockLesson(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
@@ -135,6 +140,7 @@ func (s *Server) handleMockLesson(w http.ResponseWriter, r *http.Request) {
 	s.Templates.ExecuteTemplate(w, "lesson_plan.html", l)
 }
 
+// get page for schools
 func (s *Server) handleSchool(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
@@ -150,6 +156,62 @@ func (s *Server) handleSchool(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	s.Templates.ExecuteTemplate(w, "schools.html", schs)
+}
+
+// redirect to test select page
+func (s *Server) handleTestRedirect(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	sch := r.FormValue("schName")
+
+	su := url.QueryEscape(sch)
+
+	u, err := url.JoinPath("/", "guided", su)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+	}
+
+	http.Redirect(w, r, u, http.StatusSeeOther)
+}
+
+// handle getting tests
+func (s *Server) handleGetTestsBySchool(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	ctx := context.Background()
+
+	su := vars["school"]
+
+	sch, err := url.QueryUnescape(su)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+	}
+
+	tsts, err := s.TestService.GetTestBySchool(ctx, sch)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+	}
+
+	u, err := url.JoinPath("/", "guided", su)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+	}
+
+	tr := &TestRequest{
+		URL:   u,
+		Tests: tsts,
+	}
+
+	// WriteJSON(w, http.StatusOK, schs)
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+
+	s.Templates.ExecuteTemplate(w, "tests.html", tr)
+
 }
 
 // writeJSON helper

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 )
 
 const testColl = "tests"
@@ -13,6 +14,12 @@ const testColl = "tests"
 type Test struct {
 	SchName string `json:"schName"`
 	Test    string `json:"test"`
+}
+
+// small helper to faciltitate template rendering
+type TestRequest struct {
+	URL   string `json:"url"`
+	Tests []*Test
 }
 
 type TestService struct {
@@ -26,7 +33,7 @@ func NewTestService(client *firestore.Client) *TestService {
 	}
 }
 
-// method to creat a bunch of tests
+// method to create a bunch of tests
 func (ts *TestService) CreateTests(ctx context.Context, tsts []*Test) error {
 
 	for _, v := range tsts {
@@ -38,6 +45,36 @@ func (ts *TestService) CreateTests(ctx context.Context, tsts []*Test) error {
 	}
 
 	return nil
+}
+
+// method to get tests by school
+func (ts *TestService) GetTestBySchool(ctx context.Context, sch string) ([]*Test, error) {
+
+	iter := ts.Client.Collection(testColl).Where("SchName", "==", sch).Documents(ctx)
+
+	defer iter.Stop()
+
+	var tsts []*Test
+
+	for {
+		doc, err := iter.Next()
+
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		var tst *Test
+
+		doc.DataTo(&tst)
+
+		tsts = append(tsts, tst)
+	}
+
+	return tsts, nil
 }
 
 // helper to read in tests
