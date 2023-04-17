@@ -5,9 +5,11 @@ import (
 	"encoding/csv"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 
 	firestore "cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 )
 
 const perfColl = "performances"
@@ -18,7 +20,13 @@ type Performance struct {
 	SchName        string  `json:"schName"`
 	Test           string  `json:"test"`
 	ItemDescriptor string  `json:"itemDescriptor"`
-	Q              float64 `json:"q'`
+	Q              float64 `json:"q"`
+}
+
+// helper to facilitate passing data to the html template
+type PerformanceRequest struct {
+	URL          string
+	Performances []*Performance
 }
 
 type PerformanceService struct {
@@ -42,6 +50,48 @@ func NewFirestoreClient() *firestore.Client {
 	}
 
 	return client
+}
+
+// get performances by school and test
+func (ps *PerformanceService) GetPerfBySchoolAndTest(ctx context.Context, sch string, tst string) ([]*Performance, error) {
+
+	// iter := ps.Client.Collection(perfColl).Where("SchName", "==", sch).Where("Test", "==", tst).OrderBy("Q", firestore.Desc).Limit(3).Documents(ctx)
+
+	iter := ps.Client.Collection(perfColl).Where("SchName", "==", sch).Where("Test", "==", tst).Documents(ctx)
+
+	defer iter.Stop()
+
+	var perfs []*Performance
+
+	for {
+		doc, err := iter.Next()
+
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		var perf *Performance
+
+		doc.DataTo(&perf)
+
+		perfs = append(perfs, perf)
+	}
+
+	//sort of janky, but right now we're returning everything, sorting, then filtering only to the top 3
+	//this is a limitation of firestore
+	sort.SliceStable(perfs, func(i, j int) bool {
+		return perfs[i].Q < perfs[j].Q
+	})
+
+	f := len(perfs) - 3
+
+	p := perfs[f:]
+
+	return p, nil
 }
 
 // method to write to firestore

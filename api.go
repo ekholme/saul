@@ -47,8 +47,9 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/guided", s.handleSchool).Methods("GET")
 	s.Router.HandleFunc("/guided", s.handleTestRedirect).Methods("POST")
 	s.Router.HandleFunc("/guided/{school}", s.handleGetTestsBySchool).Methods("GET")
+	s.Router.HandleFunc("/guided/{school}", s.handlePerfRedirect).Methods("POST")
+	s.Router.HandleFunc("/guided/{school}/{test}", s.handleGetPerformances).Methods("GET")
 	// s.Router.HandleFunc("/", s.handleMockLesson).Methods("POST")
-
 }
 
 // method to run the server
@@ -170,6 +171,29 @@ func (s *Server) handleTestRedirect(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	http.Redirect(w, r, u, http.StatusSeeOther)
+}
+
+// redirect to appropriate performance page
+func (s *Server) handlePerfRedirect(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	su := vars["school"]
+
+	r.ParseForm()
+
+	tst := r.FormValue("test")
+
+	tu := url.QueryEscape(tst)
+
+	u, err := url.JoinPath("/", "guided", su, tu)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
 	}
 
 	http.Redirect(w, r, u, http.StatusSeeOther)
@@ -187,18 +211,21 @@ func (s *Server) handleGetTestsBySchool(w http.ResponseWriter, r *http.Request) 
 
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, err)
+		return
 	}
 
 	tsts, err := s.TestService.GetTestBySchool(ctx, sch)
 
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, err)
+		return
 	}
 
 	u, err := url.JoinPath("/", "guided", su)
 
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, err)
+		return
 	}
 
 	tr := &TestRequest{
@@ -206,11 +233,58 @@ func (s *Server) handleGetTestsBySchool(w http.ResponseWriter, r *http.Request) 
 		Tests: tsts,
 	}
 
-	// WriteJSON(w, http.StatusOK, schs)
 	w.Header().Add("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
 
 	s.Templates.ExecuteTemplate(w, "tests.html", tr)
+
+}
+
+func (s *Server) handleGetPerformances(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	vars := mux.Vars(r)
+
+	su := vars["school"]
+	tu := vars["test"]
+
+	sch, err := url.QueryUnescape(su)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	tst, err := url.QueryUnescape(tu)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	perfs, err := s.PerformanceService.GetPerfBySchoolAndTest(ctx, sch, tst)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	u, err := url.JoinPath("/", "guided", su, tu)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	pr := &PerformanceRequest{
+		URL:          u,
+		Performances: perfs,
+	}
+	// WriteJSON(w, http.StatusOK, perfs)
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+
+	s.Templates.ExecuteTemplate(w, "descriptors.html", pr)
 
 }
 

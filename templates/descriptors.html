@@ -1,0 +1,21 @@
+{{ template "header.html"}}
+
+<p>Based on your recent testing data, Saul has identified the following areas as the most beneficial ones on which to focus instruction. Choose one, and Saul will generate a lesson focusing on that skill.</p>
+
+<form action="{{.URL}}" method="post" name="school">
+    <div class="col-12">
+        <label for="itemDescriptor" class="form-label">Select an Item Descriptor</label>
+        <select class="form-select" aria-label="itemDescriptor" name="itemDescriptor">
+            {{range .Performances}}
+                <option value="{{.SchName}}">{{.ItemDescriptor}}</option>
+            {{end}}
+        </select>
+    </div>
+
+    <div class="text-center">
+        <button class="w-33 btn btn-primary btn-lg" type="submit">Get a Lesson!</button>
+    </div>
+
+</form>
+
+{{ template "footer.html"}}
