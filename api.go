@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"regexp"
 
 	"github.com/gorilla/mux"
 	"github.com/sashabaranov/go-openai"
@@ -49,6 +50,7 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/guided/{school}", s.handleGetTestsBySchool).Methods("GET")
 	s.Router.HandleFunc("/guided/{school}", s.handlePerfRedirect).Methods("POST")
 	s.Router.HandleFunc("/guided/{school}/{test}", s.handleGetPerformances).Methods("GET")
+	s.Router.HandleFunc("/guided/{school}/{test}", s.handleGuidedLessonRequest).Methods("POST")
 	// s.Router.HandleFunc("/", s.handleMockLesson).Methods("POST")
 }
 
@@ -285,6 +287,66 @@ func (s *Server) handleGetPerformances(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	s.Templates.ExecuteTemplate(w, "descriptors.html", pr)
+
+}
+
+//guided version of lesson request
+
+func (s *Server) handleGuidedLessonRequest(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	ctx := context.Background()
+
+	vars := mux.Vars(r)
+
+	tu := vars["test"]
+
+	tst, err := url.QueryUnescape(tu)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	re := regexp.MustCompile(`\d`)
+
+	g := re.FindAllString(tst, 1)
+
+	//extract the first character, which will be the grade in this case
+	gs := g[0]
+
+	if gs == "3" {
+		gs = "3rd"
+	} else {
+		gs = gs + "th"
+	}
+
+	lr := &LessonRequest{
+		Grade:          gs,
+		ItemDescriptor: r.FormValue("itemDescriptor"),
+		StudentPop:     "all students",
+	}
+
+	m := lr.CreateGPTMessage()
+
+	req := openai.ChatCompletionRequest{
+		Model:    openai.GPT3Dot5Turbo,
+		Messages: m,
+	}
+
+	resp, err := s.GPTClient.CreateChatCompletion(ctx, req)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	l := NewLessonResponse(lr, resp.Choices[0].Message.Content)
+
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+
+	s.Templates.ExecuteTemplate(w, "lesson_plan.html", l)
 
 }
 

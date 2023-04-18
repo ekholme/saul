@@ -7,7 +7,7 @@
         <label for="itemDescriptor" class="form-label">Select an Item Descriptor</label>
         <select class="form-select" aria-label="itemDescriptor" name="itemDescriptor">
             {{range .Performances}}
-                <option value="{{.SchName}}">{{.ItemDescriptor}}</option>
+                <option value="{{.ItemDescriptor}}">{{.ItemDescriptor}}</option>
             {{end}}
         </select>
     </div>
