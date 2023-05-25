@@ -40,22 +40,8 @@ func NewPerformanceService(client *firestore.Client) *PerformanceService {
 	}
 }
 
-func NewFirestoreClient() *firestore.Client {
-	ctx := context.Background()
-
-	client, err := firestore.NewClient(ctx, projectID)
-
-	if err != nil {
-		log.Fatalf("Couldn't create firestore client: %v", err)
-	}
-
-	return client
-}
-
 // get performances by school and test
 func (ps *PerformanceService) GetPerfBySchoolAndTest(ctx context.Context, sch string, tst string) ([]*Performance, error) {
-
-	// iter := ps.Client.Collection(perfColl).Where("SchName", "==", sch).Where("Test", "==", tst).OrderBy("Q", firestore.Desc).Limit(3).Documents(ctx)
 
 	iter := ps.Client.Collection(perfColl).Where("SchName", "==", sch).Where("Test", "==", tst).Documents(ctx)
 
@@ -94,17 +80,7 @@ func (ps *PerformanceService) GetPerfBySchoolAndTest(ctx context.Context, sch st
 	return p, nil
 }
 
-// method to write to firestore
-func (ps *PerformanceService) CreatePerformance(ctx context.Context, p *Performance) error {
-	_, _, err := ps.Client.Collection(perfColl).Add(ctx, p)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
+// below this are utility functions to write stuff to firestore
 // method to write a bunch of performances
 func (ps *PerformanceService) CreatePerformances(ctx context.Context, perfs []*Performance) error {
 
@@ -119,6 +95,7 @@ func (ps *PerformanceService) CreatePerformances(ctx context.Context, perfs []*P
 }
 
 // count the number of performances in the collection
+// this is a utility function to help with ingesting data
 func (ps *PerformanceService) CountPerformances(ctx context.Context) (map[string]interface{}, error) {
 	query := ps.Client.Collection(perfColl).NewAggregationQuery().WithCount("count")
 

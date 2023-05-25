@@ -12,11 +12,6 @@ import (
 
 func main() {
 
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Fatalf("couldn't load .env file")
-	// }
-
 	tmpl, err := template.ParseGlob("templates/*.html")
 	if err != nil {
 		log.Fatalf("couldn't parse templates: %v", err)
@@ -44,33 +39,6 @@ func main() {
 
 	//create server
 	s := saul.NewServer(r, client, tmpl, ps, ts, ss)
-
-	//data ingest bullshit again
-	// ctx := context.Background()
-
-	// perf_data, err := saul.IngestPerformance("./data/toy_data.csv")
-
-	// if err != nil {
-	// 	log.Fatalf("Couldn't read in performance data: %v", err)
-	// }
-
-	// tst_data, err := saul.IngestTests("./data/tsts.csv")
-
-	// if err != nil {
-	// 	log.Fatalf("Couldn't read in test data: %v", err)
-	// }
-
-	// err = ps.CreatePerformances(ctx, perf_data)
-
-	// if err != nil {
-	// 	log.Fatalf("Couldn't write performance data to firestore: %v", err)
-	// }
-
-	// err = ts.CreateTests(ctx, tst_data)
-
-	// if err != nil {
-	// 	log.Fatalf("Couldn't write test data to firestore: %v", err)
-	// }
 
 	s.Run()
 }

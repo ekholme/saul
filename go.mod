@@ -5,7 +5,7 @@ go 1.19
 require (
 	cloud.google.com/go/firestore v1.9.0
 	github.com/gorilla/mux v1.8.0
-	github.com/sashabaranov/go-openai v1.5.1
+	github.com/sashabaranov/go-openai v1.9.4
 	google.golang.org/api v0.103.0
 )
 

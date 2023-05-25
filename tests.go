@@ -33,20 +33,6 @@ func NewTestService(client *firestore.Client) *TestService {
 	}
 }
 
-// method to create a bunch of tests
-func (ts *TestService) CreateTests(ctx context.Context, tsts []*Test) error {
-
-	for _, v := range tsts {
-		_, _, err := ts.Client.Collection(testColl).Add(ctx, v)
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // method to get tests by school
 func (ts *TestService) GetTestBySchool(ctx context.Context, sch string) ([]*Test, error) {
 
@@ -75,6 +61,21 @@ func (ts *TestService) GetTestBySchool(ctx context.Context, sch string) ([]*Test
 	}
 
 	return tsts, nil
+}
+
+// below this are utility functions to facilitate uploading data to firestore
+// method to create a bunch of tests
+func (ts *TestService) CreateTests(ctx context.Context, tsts []*Test) error {
+
+	for _, v := range tsts {
+		_, _, err := ts.Client.Collection(testColl).Add(ctx, v)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // helper to read in tests

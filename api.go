@@ -282,7 +282,7 @@ func (s *Server) handleGetPerformances(w http.ResponseWriter, r *http.Request) {
 		URL:          u,
 		Performances: perfs,
 	}
-	// WriteJSON(w, http.StatusOK, perfs)
+
 	w.Header().Add("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
 
@@ -290,8 +290,7 @@ func (s *Server) handleGetPerformances(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//guided version of lesson request
-
+// guided version of lesson request
 func (s *Server) handleGuidedLessonRequest(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 

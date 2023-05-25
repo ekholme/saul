@@ -19,6 +19,8 @@ func (lr *LessonRequest) CreateGPTMessage() []openai.ChatCompletionMessage {
 		s = "Plan a lesson for " + lr.Grade + " grade " + lr.StudentPop + " on " + lr.ItemDescriptor
 	}
 
+	s = s + " Please include example problems and activities in the lesson."
+
 	m := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleUser,
