@@ -297,10 +297,27 @@ func (s *Server) handleGuidedLessonRequest(w http.ResponseWriter, r *http.Reques
 	ctx := context.Background()
 
 	vars := mux.Vars(r)
-
+	su := vars["school"]
 	tu := vars["test"]
 
+	sch, err := url.QueryUnescape(su)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	tst, err := url.QueryUnescape(tu)
+
+	if err != nil {
+		WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	item := r.FormValue("itemDescriptor")
+
+	//kinda janky to do this here but w/e
+	p, err := s.PerformanceService.GetPerfBySchTestItem(ctx, sch, tst)
 
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, err)
@@ -322,7 +339,8 @@ func (s *Server) handleGuidedLessonRequest(w http.ResponseWriter, r *http.Reques
 
 	lr := &LessonRequest{
 		Grade:          gs,
-		ItemDescriptor: r.FormValue("itemDescriptor"),
+		ItemDescriptor: item,
+		BestPractice:   p.BestPractice,
 		StudentPop:     "all students",
 	}
 

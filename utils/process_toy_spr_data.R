@@ -57,4 +57,9 @@ math_df <- df_sliced |>
     left_join(math_lookup) |>
     select(sch_name, test, item_descriptor, best_practice, q)
 
-write_csv(math_df, "./data/toy_math_data_bp.csv")
+write_csv(math_df, "./data/toy_math_data_bp.csv", col_names = FALSE)
+
+tsts_df <- math_df |>
+    distinct(sch_name, test)
+
+write_csv(tsts_df, "./data/tsts_math.csv", col_names = FALSE)

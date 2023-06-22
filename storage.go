@@ -11,7 +11,7 @@ import (
 func NewFirestoreClient() *firestore.Client {
 	ctx := context.Background()
 
-	client, err := firestore.NewClient(ctx, projectID)
+	client, err := firestore.NewClient(ctx, "saul-lesson-planner")
 
 	if err != nil {
 		log.Fatalf("Couldn't create firestore client: %v", err)

@@ -5,6 +5,7 @@ import "github.com/sashabaranov/go-openai"
 type LessonRequest struct {
 	Grade          string `json:"grade"`
 	ItemDescriptor string `json:"itemDescriptor"`
+	BestPractice   string `json:"bestPractice"`
 	StudentPop     string `json:"studentPop"`
 }
 
@@ -19,7 +20,7 @@ func (lr *LessonRequest) CreateGPTMessage() []openai.ChatCompletionMessage {
 		s = "Plan a lesson for " + lr.Grade + " grade " + lr.StudentPop + " on " + lr.ItemDescriptor
 	}
 
-	s = s + " Please include example problems and activities in the lesson."
+	s = s + " Please " + lr.BestPractice + " in the lesson plan."
 
 	m := []openai.ChatCompletionMessage{
 		{

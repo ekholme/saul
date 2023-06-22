@@ -1,5 +1,7 @@
 library(tidyverse)
 
+set.seed(0408)
+
 df_raw <- readRDS(here::here("data/winter_22_working.Rds"))
 
 schs <- unique(df_raw$sch_name[df_raw$tst_yr == 2022 & df_raw$tst_window == "Winter"])

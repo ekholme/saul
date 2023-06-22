@@ -3,6 +3,7 @@ package saul
 import (
 	"context"
 	"encoding/csv"
+	"errors"
 	"log"
 	"os"
 	"sort"
@@ -14,12 +15,11 @@ import (
 
 const perfColl = "performances"
 
-const projectID = "saul-lesson-planner"
-
 type Performance struct {
 	SchName        string  `json:"schName"`
 	Test           string  `json:"test"`
 	ItemDescriptor string  `json:"itemDescriptor"`
+	BestPractice   string  `json:"bestPractice"`
 	Q              float64 `json:"q"`
 }
 
@@ -80,6 +80,41 @@ func (ps *PerformanceService) GetPerfBySchoolAndTest(ctx context.Context, sch st
 	return p, nil
 }
 
+func (ps *PerformanceService) GetPerfBySchTestItem(ctx context.Context, sch string, tst string, item string) (*Performance, error) {
+
+	iter := ps.Client.Collection(perfColl).Where("SchName", "==", sch).Where("Test", "==", tst).Where("ItemDescriptor", "==", item).Documents(ctx)
+
+	defer iter.Stop()
+
+	var perfs []*Performance
+
+	for {
+		doc, err := iter.Next()
+
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		var perf *Performance
+
+		doc.DataTo(&perf)
+
+		perfs = append(perfs, perf)
+	}
+
+	if len(perfs) < 1 {
+		return nil, errors.New("couldn't retrieve performances")
+	}
+
+	p := perfs[0]
+
+	return p, nil
+}
+
 // below this are utility functions to write stuff to firestore
 // method to write a bunch of performances
 func (ps *PerformanceService) CreatePerformances(ctx context.Context, perfs []*Performance) error {
@@ -131,7 +166,7 @@ func IngestPerformance(path string) ([]*Performance, error) {
 
 	for k, v := range lines {
 
-		q, err := strconv.ParseFloat(v[3], 64)
+		q, err := strconv.ParseFloat(v[4], 64)
 
 		if err != nil {
 			log.Fatal("couldn't parse Q as float")
@@ -141,6 +176,7 @@ func IngestPerformance(path string) ([]*Performance, error) {
 			SchName:        v[0],
 			Test:           v[1],
 			ItemDescriptor: v[2],
+			BestPractice:   v[3],
 			Q:              q,
 		}
 
