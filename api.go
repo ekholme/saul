@@ -317,7 +317,7 @@ func (s *Server) handleGuidedLessonRequest(w http.ResponseWriter, r *http.Reques
 	item := r.FormValue("itemDescriptor")
 
 	//kinda janky to do this here but w/e
-	p, err := s.PerformanceService.GetPerfBySchTestItem(ctx, sch, tst)
+	p, err := s.PerformanceService.GetPerfBySchTestItem(ctx, sch, tst, item)
 
 	if err != nil {
 		WriteJSON(w, http.StatusInternalServerError, err)
